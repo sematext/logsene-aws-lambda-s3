@@ -16,8 +16,8 @@ LOGSENE_APP_TOKEN = 'xxxx-xxxx-xxxx-xxxx'
 # empty string will skip logging debug messages
 LOGSENE_DEBUG_TOKEN = ''
 
-RETRIES = 3      # how many times to retry sending a log if something breaks in the connection
-RETRY_SLEEP = 2   # number of seconds to sleep between retries
+RETRIES = 10      # how many times to retry sending a log if something breaks in the connection
+RETRY_SLEEP = 6   # number of seconds to sleep between retries
 
 ################SETUP################
 if LOGSENE_DEBUG_TOKEN <> '':
