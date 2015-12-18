@@ -4,24 +4,27 @@ import urllib
 import boto3
 import socket
 import time
+import zlib
 
 #################VARIABLES###########
 LOGSENE_SERVER = 'logsene-receiver-syslog.sematext.com'
 LOGSENE_PORT = 514
 
 # application where you want to send your logs
-LOGSENE_APP_TOKEN = 'xxxx-xxxx-xxxx-xxxx'
+LOGSENE_APP_TOKEN = 'xxxx-xxxxx-xxxxx-xxxxx'
 
 # application where you'd send debug messages of this script
 # empty string will skip logging debug messages
 LOGSENE_DEBUG_TOKEN = ''
 
-RETRIES = 3      # how many times to retry sending a log if something breaks in the connection
-RETRY_SLEEP = 2   # number of seconds to sleep between retries
+RETRIES = 10      # how many times to retry sending a log if something breaks in the connection
+RETRY_SLEEP = 6   # number of seconds to sleep between retries
 
 ################SETUP################
 if LOGSENE_DEBUG_TOKEN <> '':
     DEBUG_ENABLED = True
+else:
+    DEBUG_ENABLED = False
 
 s3 = boto3.client('s3')
 logsene_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -78,8 +81,24 @@ def lambda_handler(event, context):
         logsene_connection.close()
         raise e
 
+    try:
+        data = zlib.decompress(data, 16+zlib.MAX_WBITS)
+        debug("Detected gzipped content")
+    except zlib.error:
+        debug("Content couldn't be ungzipped, assuming plain text")
+
     lines = data.split("\n")
-    
+
     for line in lines:
-        debug(line)
+        try: # trying to parse JSON logs here
+            json_line = json.loads(line)
+            try:
+                for record in json_line['Records']: # these would be CloudTrail logs
+                    forward_to_logsene("@cee:" + json.dumps(record))
+            except KeyError: # no CloudTrail logs then, will send the whole JSON line
+                 forward_to_logsene("@cee:" + line)
+        except ValueError: # ok, so it's not JSON
+            if line <> "": # let's skip empty strings
+                forward_to_logsene(line)
+    
     logsene_connection.close()
