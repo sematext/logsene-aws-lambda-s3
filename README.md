@@ -1,6 +1,6 @@
 
-# logsene-aws-lambda-s3
-[AWS Lambda](https://aws.amazon.com/documentation/lambda/) function to send logs that you store in [Amazon S3](https://aws.amazon.com/documentation/s3/) to [Logsene](https://sematext.com/logsene/), a Log Management SaaS that's part of [Sematext Cloud](https://sematext.com/cloud). As new log files are added to your S3 bucket, this function will fetch and parse them before sending their contents to your Logs Apps in Sematext Cloud.
+# AWS S3 + AWS Lambda --> Sematext Cloud
+[AWS Lambda](https://aws.amazon.com/documentation/lambda/) function to send logs stored in [Amazon S3](https://aws.amazon.com/documentation/s3/) to [Logsene](https://sematext.com/logsene/), a Log Management SaaS that's part of [Sematext Cloud](https://sematext.com/cloud). As new log files are added to your S3 bucket, this function will fetch and parse them before sending their contents to your Logs App in Sematext Cloud.
 
 ## Features
  - deals with GZIPped logs
