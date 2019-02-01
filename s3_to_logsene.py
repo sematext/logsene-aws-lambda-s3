@@ -5,7 +5,7 @@ import socket
 import time
 import zlib
 
-LOGSENE_SERVER = 'logsene-receiver-syslog.sematext.com'
+LOGSENE_SERVER = 'logsene-syslog-receiver.sematext.com'
 LOGSENE_PORT = 514
 
 # application where you want to send your logs
