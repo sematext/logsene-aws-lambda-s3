@@ -19,7 +19,8 @@ Next, select the source for your logs. The source type needs to be S3. You'll ne
 Next, configure your function. A few things are needed here:
 - provide a name for your function
 - set Runtime to Python 3.7
-- paste the contents of s3_to_logsene.py and use it to replace all existing function code. Also replace the dummy token (xxxx-xxxx-xxxx-xxxx) with your application's token.
+- paste the contents of s3_to_logsene.py and use it to replace all existing function code. Also replace the dummy token (xxxx-xxxx-xxxx-xxxx) with your application's token
+- if you're in the EU region, change `LOGSENE_SERVER` to `logsene-syslog-receiver.eu.sematext.com`
 - set the trigger to be *All object create events* and select your S3 bucket.
 - select an execution role that allows this function to access the S3 bucket in order to fetch logs. If you don't have one already, select S3 execution role from the dropdown, and you'll be redirected to the IAM window, where you can accept the provided values and return.
 - select how much memory you allow for the function and how long you allow it to run. The default 128MB should be enough to load typical CloudTrail logs, which are small. You'd need more memory if you upload larger logs. As for timeout, 4-5 minutes should be enough to give some resiliency in case of a network issue, allowing the function to retry.
