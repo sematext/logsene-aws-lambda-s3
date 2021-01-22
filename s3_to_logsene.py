@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-LOGSENE_SERVER = 'logsene-receiver-syslog.sematext.com'
+LOGSENE_SERVER = 'logsene-syslog-receiver.sematext.com' # change to logsene-syslog-receiver.eu.sematext.com if you're in the EU region
 LOGSENE_PORT = 514
 
 # application where you want to send your logs
