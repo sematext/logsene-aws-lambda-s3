@@ -1,6 +1,6 @@
 
 # AWS S3 + AWS Lambda --> Sematext Cloud
-[AWS Lambda](https://aws.amazon.com/documentation/lambda/) function to send logs stored in [Amazon S3](https://aws.amazon.com/documentation/s3/) to [Logsene](https://sematext.com/logsene/), a Log Management SaaS that's part of [Sematext Cloud](https://sematext.com/cloud). As new log files are added to your S3 bucket, this function will fetch and parse them before sending their contents to your Logs App in Sematext Cloud.
+[AWS Lambda](https://aws.amazon.com/documentation/lambda/) function to send logs stored in [Amazon S3](https://aws.amazon.com/documentation/s3/) to [Sematext Logs](https://sematext.com/logsene/), a Log Management SaaS that's part of [Sematext Cloud](https://sematext.com/cloud). As new log files are added to your S3 bucket, this function will fetch and parse them before sending their contents to your Logs App in Sematext Cloud.
 
 ## Features
  - deals with GZIPped logs
@@ -10,57 +10,18 @@
  - we can add more :) Feel free to file issues!
 
 ## How To
-This tutorial shows how to send CloudTrail logs (which are .gz logs that AWS puts in a certain S3 bucket) to a Sematext Logs App, but should apply to any kind of logs that you put into S3.
+To start, log in to your AWS Console, then go to *Services* -> *Lambda*. From there, you'd either create a new function or click on Get Started Now to create your first Lambda function.
 
-The main steps are:
- 0. Have some logs in an AWS S3 bucket :)
- 1. Create a new AWS Lambda function
- 2. Paste the code from this repository and fill in your Sematext Logs App Token
- 3. Point the function to your S3 bucket and give it permissions
- 4. Decide on the maximum memory to allocate for this function and the timeout for its execution
- 5. Explore your logs in Sematext :)
+Then the first step is to select a blueprint for your function. Select *s3-get-object-python*.
 
-### Create a new AWS Lambda function
-To start, log in to your AWS Console, then go to Services -> Lambda
-![Services](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/services.png)
+Next, select the source for your logs. The source type needs to be S3. You'll need to provide the Bucket for your logs and specify Object Created (All) as the Event type.
 
-From there you'd start creating a function. If you don't have another function, you'd just click on Get Started Now and it gets you there.
-![get_started](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/get_started.png)
+Next, configure your function. A few things are needed here:
+- provide a name for your function
+- set Runtime to Python 3.7
+- paste the contents of s3_to_logsene.py and use it to replace all existing function code. Also replace the dummy token (xxxx-xxxx-xxxx-xxxx) with your application's token.
+- set the trigger to be *All object create events* and select your S3 bucket.
+- select an execution role that allows this function to access the S3 bucket in order to fetch logs. If you don't have one already, select S3 execution role from the dropdown, and you'll be redirected to the IAM window, where you can accept the provided values and return.
+- select how much memory you allow for the function and how long you allow it to run. The default 128MB should be enough to load typical CloudTrail logs, which are small. You'd need more memory if you upload larger logs. As for timeout, 4-5 minutes should be enough to give some resiliency in case of a network issue, allowing the function to retry.
 
-Then the first step is to select a blueprint for your function. Take *s3-get-object-python*.
-![blueprint](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/blueprint.png)
-
-The next step is to select a source. Here you'd make sure the source type is S3, select the bucket to fetch logs from and pick *Object Created (All)* as the event type. This will make the function run whenever a new object is created in that bucket.
-![source](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/source.png)
-
-### Paste the code and provide your token
-The main step is to provide the details of your function. You'd give it a name and leave the runtime as Python 2.7:
-![name](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/name.png)
-
-Then paste the **whole** contents of s3_to_logsene.py from this repository and use it to **replace** all existing function code. Also replace the dummy token with the token of the Sematext Logs App where you want to ship logs:
-![code](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/code.png)
-
-To find the Logs App Token, just look at [your Logs Apps](https://apps.sematext.com/ui/logs) and grab it from there.
-![token](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/token.png)
-
-### Give the function permissions
-After the code, leave the handler to the default *lambda_function.lambda_handler* and select a role that allows this function to access the S3 bucket in order to fetch logs. If you don't have one already, select **S3 execution role** from the dropdown, and you'll be redirected to the [IAM](https://aws.amazon.com/documentation/iam/) window, where you can accept the provided values and return.
-![role](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/role.png)
-
-### Memory and timeout, then "go"
-Finally, you need to decide on how much memory you allow for the function and how long you allow it to run. This will influence costs (i.e. like keeping the equivalent general-purpose instance up for that time). Normally, runtime is very short (sub-second) so even large resources shouldn't generate significant costs.
-![memory_timeout](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/memory_timeout.png)
-
-The default 128MB of RAM should be enough to load typical CloudTrail logs, which are small. You'd need more memory if you upload larger logs. As for timeout, selecting 4-5 minutes should be enough to give some resiliency in case of a network issue (i.e. allow the function to retry - which can be configured in the function code).
-
-To enable the function to run when a new object is put, you'd need to enable the source at the last step.
-![enable](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/enable.png)
-
-### Exploring CloudTrail logs with Sematext
-As logs get uploaded to the S3 bucket, the function should upload their contents to Sematext. You can use the native UI to explore those logs:
-![native](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/native.png)
-
-And because CloudTrail logs get parsed out of the box, you can also use Kibana to generate visualizations. Like breaking down events by their type:
-![Kibana](https://raw.githubusercontent.com/sematext/logsene-aws-lambda-s3/master/img/kibana.png)
-
-Happy CloudTrailing with Sematext!
+At this point, whenever new logs are uploaded to your S3 bucket, the Lambda should pick them up and send them.
